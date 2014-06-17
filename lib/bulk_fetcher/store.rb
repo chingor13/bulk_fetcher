@@ -1,12 +1,15 @@
 module BulkFetcher
   class Store
-    attr_reader :klass, :id_queue, :cache, :finder
+    attr_reader :klass, :id_queue, :cache, :finder, :index_by
 
     def initialize(options = {})
-      @klass = options.fetch(:klass)
       @finder = options.fetch(:finder) do
+        klass = options.fetch(:klass) do
+          raise ArgumentError, "must specify a :klass or a :finder method"
+        end
         klass.method(:find)
       end
+      @index_by = options.fetch(:index_by, :id)
       reset!
     end
    
@@ -25,7 +28,7 @@ module BulkFetcher
       fetch_items(missing_ids + read_queue)
 
       new_items, missing_ids = lookup_items(missing_ids)
-      items_by_id = (items + new_items).inject({}){ |collection, item| collection[item.id] = item; collection}
+      items_by_id = (items + new_items).inject({}){ |collection, item| collection[cache_key(item)] = item; collection}
 
       ids.map{|id| items_by_id[id] }
     end
@@ -72,8 +75,12 @@ module BulkFetcher
    
     def store_items(objects)
       Array(objects).each do |object|
-        cache[object.id] = object
+        cache[cache_key(object)] = object
       end
+    end
+
+    def cache_key(object)
+      object.public_send(index_by)
     end
 
   end
