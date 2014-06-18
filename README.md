@@ -25,11 +25,11 @@ finder = ->(ids) { MyActiveRecordClass.includes(:some_association).find(ids) }
 fetcher = BulkFetcher.new(finder: finder)
 ```
 
-## Custom index_by
+## Custom fields
 
 Sometimes, if you want to find by some field other than `id`.
 
 ```
 fetcher = BulkFetcher.new(finder: ->(ids) { MyActiveRecordClass.where(:some_key_id => ids).all },
-                          index_by: :some_key_ids)
+                          index_by: :some_key_id)
 ```
