@@ -21,7 +21,8 @@ object = fetcher.fetch(4)
 ## Custom finder
 
 ```
-fetcher = BulkFetcher.new(finder: lambda{|ids| MyActiveRecordClass.includes(:some_association).find(ids)})
+finder = ->(ids) { MyActiveRecordClass.includes(:some_association).find(ids) }
+fetcher = BulkFetcher.new(finder: finder)
 ```
 
 ## Custom index_by
